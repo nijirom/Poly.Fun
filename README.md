@@ -68,8 +68,7 @@ Poly.Fun is built on Python’s asyncio framework for non-blocking concurrency, 
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/yourusername/polysol-sniper.git](https://github.com/yourusername/polysol-sniper.git)
-    cd polysol-sniper
+    gh repo clone nijirom/Poly.Fun
     ```
 
 2.  **Install Dependencies**
