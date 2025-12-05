@@ -1,95 +1,137 @@
 # Poly.Fun
-Degenerate sniping with probabilistic edge.
+**Degenerate sniping with probabilistic edge.**
+
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue) ![Solana](https://img.shields.io/badge/Solana-Mainnet-green) ![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 ## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Disclaimer](#disclaimer)
 
-# Overview
-Poly.Fun bridges the gap between off-chain information markets and on-chain decentralized exchanges. By monitoring the Polymarket CLOB (Central Limit Order Book) for significant price deviations, the system allows traders to capture volatility on Solana-based assets that are correlated to specific real-world outcomes
+* [Important Disclaimer](#important-disclaimer)
+* [Technical Summary](#technical-summary)
+* [Features](#features)
+* [Architecture](#architecture)
+* [Installation](#installation)
+    * [Prerequisites](#prerequisites)
+    * [Setup](#setup)
+* [Usage](#usage)
+    * [Configuration Variables](#configuration-variables)
+* [Requirements](#requirements)
+* [Roadmap](#roadmap)
 
+---
 
-# Features
-- Real-time Volatility Scanning: Python-based scanner monitors specific Polymarket Token IDs for custom price deltas.
+## Important Disclaimer
 
-- Instant Swap Routes: Integrated with Jupiter Aggregator to find the best liquidity paths.
+**EDUCATIONAL PURPOSES ONLY.**
+This software handles real cryptocurrency private keys and executes financial transactions.
 
-- Non-Custodial Execution: All transactions are signed via the user's browser wallet (Phantom/Solflare); private keys are never exposed to the server.
+* **High Risk:** Memecoins are volatile assets. Slippage can be high, and rug pulls are common.
+* **Security:** Never commit your `.env` file or private keys to GitHub.
+* **Liability:** The authors are not responsible for any financial losses incurred while using this bot. **Use a burner wallet with small amounts of funds.**
 
-- Custom Asset Mapping: JSON-based configuration to link specific prediction events to specific Solana SPL tokens.
+---
 
+## Technical Summary
 
-# Architecture
-- Backend: Python 3.10+, py-clob-client
+PolySol Sniper is an event-driven algorithmic trading system designed to exploit the latency arbitrage between prediction market probabilities and on-chain token valuations. Built upon Python’s `asyncio` framework, the architecture facilitates non-blocking concurrency, allowing the system to simultaneously ingest real-time market data, perform semantic analysis, and execute cryptographic transactions on the Solana network without thread-blocking overhead.
 
-- Frontend: Next.js 14, TypeScript, Tailwind CSS
+At the ingestion layer, the system maintains a persistent WebSocket connection to Polymarket’s Central Limit Order Book (CLOB). Unlike traditional REST-based polling, this push-based architecture ensures millisecond-level latency for price updates. A custom in-memory `PriceTracker` state machine processes incoming JSON ticks, calculating price deltas against previous states. This logic utilizes a configurable volatility threshold to filter market noise, isolating high-confidence signals that indicate a sudden shift in real-world event probabilities.
 
-- Blockchain Integration: @solana/web3.js, Jupiter v6 API
+---
 
+## Features
 
-# Prerequisites
-- Node.js (v18 or higher)
+* **Async WebSocket Core:** Connects directly to Polymarket's CLOB (Central Limit Order Book) for millisecond-latency price updates, avoiding slow REST polling.
+* **Custom "Big Move" Logic:** Tracks market state in memory and only triggers alerts on price swings exceeding a defined threshold (e.g., > 3 cents within a 60s window).
+* **NLP Keyword Extraction:** Uses smart filtering to remove stop-words and identify tradable tickers based on prediction market questions.
+* **Liquidity Filtering:** Automatically filters DexScreener results to avoid "dead" or illiquid scam tokens.
+* **Jupiter v6 Integration:** Uses the Jupiter Aggregator API for the most efficient swap routes on Solana.
+* **Safety Confirmations:** Includes an interactive "Press Y to Confirm" step to prevent accidental buys on false positives.
 
-- Python (v3.9 or higher)
+---
 
-- Solana Wallet (Phantom or Solflare browser extension)
+## Architecture
 
-- RPC Node (Optional but recommended for production: Helius or QuickNode)
+1.  **Monitor:** The bot subscribes to the top 50 active Polymarket events via WebSocket (`wss://ws-clob.polymarket.com/ws`).
+2.  **Analyze:** It compares incoming ticks against a local state cache. If `abs(NewPrice - OldPrice) > THRESHOLD`, an alert is triggered.
+3.  **Search:** The bot parses the market question (e.g., *"Will Trump win...?"*) into keywords and queries the DexScreener API for Solana pairs.
+4.  **Route:** It queries Jupiter for a swap quote (SOL -> Token).
+5.  **Execute:** It constructs a signed transaction using `solders` and broadcasts it via `solana-py`.
 
+---
 
 ## Installation
-### Backend Setup
-Handles the data polling and signal generation.
+
+### Prerequisites
+* Python 3.9+
+* A Solana Wallet (Phantom, Solflare, etc.) exported as a Base58 Private Key.
+* (Optional) A custom RPC URL (Helius, QuickNode, Alchemy) for faster execution.
+
+### Setup
+
+1.  **Clone the Repository**
+    ```bash
+    git clone [https://github.com/yourusername/polysol-sniper.git](https://github.com/yourusername/polysol-sniper.git)
+    cd polysol-sniper
+    ```
+
+2.  **Install Dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Environment Configuration**
+    Create a `.env` file in the root directory:
+    ```bash
+    touch .env
+    ```
+    Add your secrets (do not share this file!):
+    ```env
+    # Your Wallet Private Key (Base58 string)
+    SOLANA_PRIVATE_KEY=your_private_key_here
+    
+    # Optional: Custom RPC (defaults to public mainnet)
+    RPC_URL=[https://api.mainnet-beta.solana.com](https://api.mainnet-beta.solana.com)
+    ```
+
+---
+
+## Usage
+
+Run the sniper:
+
 ```bash
-cd backend
-pip install -r requirements.txt
-```
-### Frontend Setup
-Handles wallet connections and transaction executions
-```bash
-cd frontend
-npm install
-#or
-yarn install
-```
-# Configuration
-Navigate to config/market_map.json. This file maps the prediction market to the tradable asset.
--polymarket_token_id: The specific outcome ID from Polymarket (e.g., "Trump Wins 2024").
--targets: The Solana Mint Addresses (CA) for the tokens you wish to buy based on the signal direction
-```json
-{
-    "polymarket_token_id": "YOUR_POLYMARKET_ID_HERE",
-    "targets": {
-        "UP": "SOLANA_MINT_ADDRESS_FOR_BULLISH_NEWS",
-        "DOWN": "SOLANA_MINT_ADDRESS_FOR_BEARISH_NEWS"
-    }
-}
+python async_sniper.py
 ```
 
-# Usage
-1. Start the Scanner Open a terminal in the backend directory:
-```bash
-python scanner.py
+### Configuration Variables
+You can tweak the logic at the top of async_sniper.py:
+
+    MOVE_THRESHOLD = 0.03: The price change (in cents) required to trigger a search.
+
+    SLIPPAGE_BPS = 50: The slippage tolerance (50 = 0.5%).
+
+    USDC_MINT / SOL_MINT: The input token for your swaps (default is SOL).
+
+---
+
+
+## Requirements
+``` plaintext
+aiohttp
+websockets
+solders
+solana
+colorama
+python-dotenv
+requests
 ```
-2. Start the Terminal Open a separate terminal in the frontend directory:
-```bash
-npm run dev
-```
-3. Execute Trades
-- Navigate to http://localhost:3000.
+---
 
-- Connect your Solana Wallet.
+## Roadmap
+[ ] Short Selling: Integrate with perpetual protocols to short tokens on bad news.
 
-- Watch the terminal for signals.
+[ ] Telegram Integration: Send alerts to a Telegram channel instead of just the CLI.
 
-- Click "Execute" when a volatility target is identified.
+[ ] MEV Protection: Integrate Jito bundles to avoid being sandwiched on buys.
 
-# Disclaimer
-This software is for educational purposes only. Trading cryptocurrencies and prediction markets involves significant risk. This software does not constitute financial advice. The developers are not responsible for financial losses, slippage, or failed transactions due to network congestion.
+[ ] AI Analysis: Use a lightweight LLM to better determine sentiment (Bullish/Bearish) before buying.
