@@ -32,7 +32,7 @@ This software handles real cryptocurrency private keys and executes financial tr
 
 ## Technical Summary
 
-PolySol Sniper is built on Python’s asyncio framework for non-blocking concurrency, this system ingests millisecond-latency price ticks from Polymarket’s CLOB via WebSockets. An in-memory state machine processes data streams to identify volatility anomalies against a configurable threshold. The asset discovery engine employs lightweight NLP for keyword extraction and validates liquidity via the DexScreener API. Trade execution is handled by the Solana Python SDK (solders and solana-py) interacting with the Jupiter Aggregator v6 API, enabling secure, local transaction signing and asynchronous RPC broadcasting.
+Poly.Fun is built on Python’s asyncio framework for non-blocking concurrency, this system ingests millisecond-latency price ticks from Polymarket’s CLOB via WebSockets. An in-memory state machine processes data streams to identify volatility anomalies against a configurable threshold. The asset discovery engine employs lightweight NLP for keyword extraction and validates liquidity via the DexScreener API. Trade execution is handled by the Solana Python SDK (solders and solana-py) interacting with the Jupiter Aggregator v6 API, enabling secure, local transaction signing and asynchronous RPC broadcasting.
 
 ---
 
