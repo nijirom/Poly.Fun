@@ -45,12 +45,14 @@ Poly.Fun bridges the gap between off-chain information markets and on-chain dece
 
 
 ## Installation
-### Backend-setup: handles the data polling and signal generation.
+### Backend-setup
+Handles the data polling and signal generation.
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
-### Frontend-Setup: handles wallet connections and transaction executions
+### Frontend-Setup
+Handles wallet connections and transaction executions
 ```bash
 cd frontend
 npm install
