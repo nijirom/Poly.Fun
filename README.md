@@ -77,11 +77,24 @@ Poly.Fun is built on Python’s asyncio framework for non-blocking concurrency, 
     ```
 
 3.  **Environment Configuration**
-    Create a `.env` file in the root directory:
+   Create a `.env` file in the root directory. Run the command matching your OS:
+    
+    **Windows (Command Prompt):**
+    ```cmd
+    type nul > .env
+    ```
+    
+    **Windows (PowerShell):**
+    ```powershell
+    ni .env
+    ```
+    
+    **Mac / Linux:**
     ```bash
     touch .env
     ```
-    Add your secrets (do not share this file!):
+
+    Open the file and add your secrets (do not share this file!):
     ```env
     # Your Wallet Private Key (Base58 string)
     SOLANA_PRIVATE_KEY=your_private_key_here
