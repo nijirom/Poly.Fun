@@ -17,7 +17,7 @@ Poly.Fun bridges the gap between off-chain information markets and on-chain dece
 
 
 # Features
-- Real-time Volatility Scanning: Python-based scanner monitors specific Polymarket Token IDs for price deltas > 5%.
+- Real-time Volatility Scanning: Python-based scanner monitors specific Polymarket Token IDs for custom price deltas.
 
 - Instant Swap Routes: Integrated with Jupiter Aggregator to find the best liquidity paths.
 
