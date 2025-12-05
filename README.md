@@ -32,9 +32,7 @@ This software handles real cryptocurrency private keys and executes financial tr
 
 ## Technical Summary
 
-PolySol Sniper is an event-driven algorithmic trading system designed to exploit the latency arbitrage between prediction market probabilities and on-chain token valuations. Built upon Python’s `asyncio` framework, the architecture facilitates non-blocking concurrency, allowing the system to simultaneously ingest real-time market data, perform semantic analysis, and execute cryptographic transactions on the Solana network without thread-blocking overhead.
-
-At the ingestion layer, the system maintains a persistent WebSocket connection to Polymarket’s Central Limit Order Book (CLOB). Unlike traditional REST-based polling, this push-based architecture ensures millisecond-level latency for price updates. A custom in-memory `PriceTracker` state machine processes incoming JSON ticks, calculating price deltas against previous states. This logic utilizes a configurable volatility threshold to filter market noise, isolating high-confidence signals that indicate a sudden shift in real-world event probabilities.
+PolySol Sniper is built on Python’s asyncio framework for non-blocking concurrency, this system ingests millisecond-latency price ticks from Polymarket’s CLOB via WebSockets. An in-memory state machine processes data streams to identify volatility anomalies against a configurable threshold. The asset discovery engine employs lightweight NLP for keyword extraction and validates liquidity via the DexScreener API. Trade execution is handled by the Solana Python SDK (solders and solana-py) interacting with the Jupiter Aggregator v6 API, enabling secure, local transaction signing and asynchronous RPC broadcasting.
 
 ---
 
